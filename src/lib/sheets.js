@@ -87,6 +87,29 @@ export function saveManualTrade(trade) {
     }
     
     fs.writeFileSync(filePath, JSON.stringify(trades, null, 2));
+
+    // Bridge manual trade to real Google Sheet via n8n webhook in background
+    const webhookUrl = 'https://n8n.tryam193.in/webhook/log-trade-record';
+    fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        timestamp: updatedTrade.Timestamp,
+        ticker: updatedTrade.Ticker || updatedTrade.ticker || '',
+        action: updatedTrade.Action || updatedTrade.action || '',
+        price: updatedTrade.Price || updatedTrade.price || '',
+        quantity: updatedTrade.Quantity || updatedTrade.quantity || '',
+        ai_verdict: updatedTrade['AI Verdict'] || updatedTrade.ai_verdict || 'MANUAL',
+        ai_reason: updatedTrade['AI Reason'] || updatedTrade.ai_reason || '',
+        order_id: updatedTrade['Order ID'] || updatedTrade.order_id || '',
+        verification_link: updatedTrade['Verification Link'] || updatedTrade.verification_link || ''
+      })
+    }).catch(err => {
+      console.error('Failed to trigger n8n sheets webhook:', err.message);
+    });
+
     return updatedTrade;
   } catch (err) {
     console.error('Failed to save manual trade:', err.message);

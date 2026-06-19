@@ -272,6 +272,30 @@ const tools = {
     }
   },
 
+  log_custom_trade_record: async ({ ticker, action, price, quantity, ai_verdict, ai_reason, verification_link }) => {
+    try {
+      const symbol = ticker.toUpperCase();
+      const saved = saveManualTrade({
+        Ticker: symbol,
+        Action: action.toUpperCase(),
+        Price: parseFloat(price).toFixed(2),
+        Quantity: parseInt(quantity).toString(),
+        "AI Verdict": ai_verdict || 'MANUAL',
+        "AI Reason": ai_reason || 'Manual record update.',
+        "Order ID": `manual_${Date.now()}`,
+        "Verification Link": verification_link || `https://finance.yahoo.com/quote/${symbol}`
+      });
+
+      return {
+        status: 'success',
+        message: `Successfully logged custom trade record for ${symbol} to the ledger.`,
+        logged_trade: saved
+      };
+    } catch (err) {
+      return { error: 'Failed to log custom trade record: ' + err.message };
+    }
+  },
+
   web_search: async ({ query }) => {
     if (process.env.TAVILY_API_KEY) {
       try {
