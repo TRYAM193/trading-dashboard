@@ -650,3 +650,402 @@
   }
 }
 
+/* Mode Selector Tabs */
+.modeTabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tabBtn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tabActive {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+/* Voice Mode Workspace */
+.voiceWorkspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 26, 42, 0.4);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 40px;
+  gap: 32px;
+  min-height: 500px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.voiceWorkspace::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.03) 0%, transparent 60%);
+  pointer-events: none;
+  animation: rotateBg 40s linear infinite;
+}
+
+@keyframes rotateBg {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.voiceOrbCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  z-index: 10;
+}
+
+.orbContainer {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.orbContainer:hover {
+  transform: scale(1.05);
+}
+
+.orbContainer:active {
+  transform: scale(0.98);
+}
+
+.orbOuter {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
+  filter: blur(12px);
+  opacity: 0.5;
+  transition: all 0.5s ease;
+}
+
+.orbInner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #764ba2 0%, #667eea 50%, #4a54c5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 10px 30px rgba(102, 126, 234, 0.3),
+    inset 0 4px 12px rgba(255, 255, 255, 0.3),
+    inset 0 -8px 24px rgba(0, 0, 0, 0.4);
+  transition: all 0.5s ease;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.orbMicIcon {
+  color: #ffffff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s ease;
+}
+
+/* Orb Animation States */
+
+/* 1. Listening State (Pulsating Pink/Orange/Cyan) */
+.listening .orbInner {
+  background: radial-gradient(circle at 30% 30%, #ff4757 0%, #ff6b81 50%, #ff2f44 100%);
+  box-shadow: 
+    0 0 40px rgba(255, 71, 87, 0.6),
+    inset 0 4px 12px rgba(255, 255, 255, 0.4),
+    inset 0 -8px 24px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.listening .orbOuter {
+  background: radial-gradient(circle, rgba(255, 71, 87, 0.4) 0%, transparent 70%);
+  opacity: 0.9;
+  animation: pulseOuter 1.5s infinite ease-in-out;
+}
+
+.listening {
+  animation: bounceOrb 1.5s infinite ease-in-out;
+}
+
+/* 2. Thinking State (Rotating Purple/Teal) */
+.thinking .orbInner {
+  background: radial-gradient(circle at 30% 30%, #e8c4ff 0%, #764ba2 60%, #4b1275 100%);
+  box-shadow: 
+    0 0 35px rgba(118, 75, 162, 0.5),
+    inset 0 4px 12px rgba(255, 255, 255, 0.3),
+    inset 0 -8px 24px rgba(0, 0, 0, 0.4);
+  animation: rotateOrbInner 6s linear infinite;
+}
+
+.thinking .orbOuter {
+  background: radial-gradient(circle, rgba(118, 75, 162, 0.3) 0%, transparent 70%);
+  opacity: 0.8;
+  animation: rotateOuter 4s linear infinite;
+}
+
+/* 3. Speaking State (Radiating Green/Cyan) */
+.speaking .orbInner {
+  background: radial-gradient(circle at 30% 30%, #2ed573 0%, #10ac84 60%, #01805b 100%);
+  box-shadow: 
+    0 0 45px rgba(46, 213, 115, 0.6),
+    inset 0 4px 12px rgba(255, 255, 255, 0.4),
+    inset 0 -8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.speaking .orbOuter {
+  background: radial-gradient(circle, rgba(46, 213, 115, 0.5) 0%, transparent 70%);
+  opacity: 0.9;
+  animation: radiateOuter 1.2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Orb Keyframes */
+@keyframes pulseOuter {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.25); opacity: 0.9; }
+}
+
+@keyframes bounceOrb {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes rotateOrbInner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes rotateOuter {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes radiateOuter {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* Voice Status Text styling */
+.voiceStatusText {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.statusListening {
+  color: #ff4757;
+  text-shadow: 0 0 10px rgba(255, 71, 87, 0.4);
+  animation: blinkText 1.5s infinite;
+}
+
+.statusThinking {
+  color: #a8b2c1;
+  animation: blinkText 2s infinite;
+}
+
+.statusSpeaking {
+  color: #2ed573;
+  text-shadow: 0 0 10px rgba(46, 213, 115, 0.4);
+}
+
+.statusTap {
+  color: var(--text-secondary);
+}
+
+@keyframes blinkText {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Vocal Soundwave Equalizer (12 vertical bars) */
+.soundwaveContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 60px;
+  width: 100%;
+  max-width: 320px;
+  opacity: 0.3;
+  transition: opacity 0.4s ease;
+}
+
+.soundwaveContainer.active {
+  opacity: 1;
+}
+
+.soundbar {
+  width: 4px;
+  height: 6px;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+  transition: height 0.15s ease, background 0.4s ease;
+}
+
+/* Set dynamic custom heights for voice mode speak states */
+.soundwaveContainer.active .soundbar {
+  background: linear-gradient(180deg, #2ed573 0%, #10ac84 100%);
+}
+
+.soundwaveContainer.active .soundbar:nth-child(1)  { animation: equalizer1 1.2s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(2)  { animation: equalizer2 0.8s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(3)  { animation: equalizer3 1.5s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(4)  { animation: equalizer4 0.9s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(5)  { animation: equalizer5 1.3s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(6)  { animation: equalizer1 0.7s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(7)  { animation: equalizer2 1.4s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(8)  { animation: equalizer3 1.0s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(9)  { animation: equalizer4 1.1s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(10) { animation: equalizer5 0.8s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(11) { animation: equalizer1 1.3s ease-in-out infinite alternate; }
+.soundwaveContainer.active .soundbar:nth-child(12) { animation: equalizer3 0.9s ease-in-out infinite alternate; }
+
+@keyframes equalizer1 { 0% { height: 6px; } 100% { height: 42px; } }
+@keyframes equalizer2 { 0% { height: 6px; } 100% { height: 28px; } }
+@keyframes equalizer3 { 0% { height: 6px; } 100% { height: 50px; } }
+@keyframes equalizer4 { 0% { height: 6px; } 100% { height: 35px; } }
+@keyframes equalizer5 { 0% { height: 6px; } 100% { height: 20px; } }
+
+/* Subtitle Overlay Card */
+.subtitleCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 480px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  text-align: center;
+}
+
+.subtitleText {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Handsfree Controls */
+.handsfreeControl {
+  margin-top: 10px;
+  z-index: 10;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.checkboxLabel:hover {
+  color: var(--text-primary);
+}
+
+.checkboxInput {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkboxCustom {
+  position: relative;
+  height: 20px;
+  width: 20px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.checkboxLabel:hover .checkboxInput ~ .checkboxCustom {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.checkboxInput:checked ~ .checkboxCustom {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.4);
+}
+
+.checkboxCustom:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkboxInput:checked ~ .checkboxCustom:after {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .voiceWorkspace {
+    padding: 24px 16px;
+    min-height: calc(100vh - 180px);
+    justify-content: space-around;
+  }
+  .orbContainer {
+    width: 140px;
+    height: 140px;
+  }
+}
+
