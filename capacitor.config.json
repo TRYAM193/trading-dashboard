@@ -1,5 +1,9 @@
 {
   "appId": "com.trading.copilot",
   "appName": "Trading Copilot",
-  "webDir": "out"
+  "webDir": "out",
+  "server": {
+    "url": "https://trading-dashboard-nine-alpha.vercel.app",
+    "cleartext": true
+  }
 }
