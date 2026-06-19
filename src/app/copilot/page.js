@@ -46,6 +46,8 @@ export default function CopilotChat() {
   const modeRef = useRef(mode);
   const continuousModeRef = useRef(continuousMode);
   const isMutedRef = useRef(isMuted);
+  const conversationHistoryRef = useRef([]);
+  const isLoadingRef = useRef(loading);
 
   // Web Audio VAD Refs & State
   const audioContextRef = useRef(null);
@@ -70,6 +72,10 @@ export default function CopilotChat() {
   useEffect(() => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
+
+  useEffect(() => {
+    isLoadingRef.current = loading;
+  }, [loading]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -133,6 +139,7 @@ export default function CopilotChat() {
       lastSpeechTimeRef.current = Date.now();
       speechDetectedRef.current = false;
 
+      let speechFrameCount = 0;
       const checkVolume = () => {
         if (!analyserRef.current) return;
         analyserRef.current.getByteFrequencyData(dataArray);
@@ -153,14 +160,21 @@ export default function CopilotChat() {
         const now = Date.now();
         // VAD threshold (RMS > 6 represents audible speech)
         if (rms > 6) {
-          lastSpeechTimeRef.current = now;
-          if (!speechDetectedRef.current) {
-            speechDetectedRef.current = true;
+          speechFrameCount++;
+          // Require at least 8 consecutive frames (~130ms) to confirm voice activity (prevents clicks/ambient noise triggers)
+          if (speechFrameCount >= 8) {
+            lastSpeechTimeRef.current = now;
+            if (!speechDetectedRef.current) {
+              speechDetectedRef.current = true;
+              console.log("VAD: Voice activity confirmed.");
+            }
           }
         } else {
-          // If user was speaking and is now silent for > 1500ms, auto-stop mic
-          if (speechDetectedRef.current && (now - lastSpeechTimeRef.current > 1500)) {
-            console.log("VAD: Silence detected. Auto-finalizing speech recognition.");
+          speechFrameCount = Math.max(0, speechFrameCount - 1);
+          
+          // If user was speaking and is now silent for > 2000ms, auto-stop mic
+          if (speechDetectedRef.current && (now - lastSpeechTimeRef.current > 2000)) {
+            console.log("VAD: Sustained silence detected. Auto-finalizing speech recognition.");
             if (recognitionRef.current) {
               try {
                 recognitionRef.current.stop();
@@ -296,8 +310,8 @@ export default function CopilotChat() {
     
     utterance.onend = () => {
       setIsSpeaking(false);
-      // If continuous mode is enabled and still in voice mode, trigger mic listening
-      if (continuousModeRef.current && modeRef.current === 'voice' && recognitionRef.current) {
+      // If continuous mode is enabled and still in voice mode, trigger mic listening (only if not loading/thinking)
+      if (continuousModeRef.current && modeRef.current === 'voice' && recognitionRef.current && !isLoadingRef.current) {
         setTimeout(() => {
           try {
             recognitionRef.current.start();
@@ -360,11 +374,13 @@ export default function CopilotChat() {
     }
 
     try {
-      // Map frontend history to API history format
-      const historyPayload = messages.map(m => ({
-        role: m.role,
-        content: m.content
-      }));
+      // Map complete ReAct context history, fall back to simple messages array if empty
+      const historyPayload = conversationHistoryRef.current.length > 0
+        ? conversationHistoryRef.current
+        : messages.map(m => ({
+            role: m.role === 'user' ? 'user' : 'assistant',
+            content: m.content
+          }));
 
       const res = await fetch('/api/copilot/chat', {
         method: 'POST',
@@ -381,6 +397,10 @@ export default function CopilotChat() {
         setMessages(prev => [...prev, { role: 'model', content: data.reply }]);
         if (data.toolLogs && data.toolLogs.length > 0) {
           setToolLogs(data.toolLogs);
+        }
+        // Save stateful ReAct execution history context
+        if (data.history) {
+          conversationHistoryRef.current = data.history;
         }
         // Speak response aloud
         speakText(data.reply);
