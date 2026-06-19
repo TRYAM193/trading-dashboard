@@ -359,145 +359,148 @@ export default function TradeHistory() {
             No matching trade log details in Google Sheets. Make sure the ledger is populated and published to web.
           </div>
         ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Ticker</th>
-                <th>Action</th>
-                <th style={{ textAlign: 'right' }}>Price</th>
-                <th style={{ textAlign: 'right' }}>Qty</th>
-                <th>Verdict</th>
-                <th>Reasoning Summary</th>
-                <th style={{ textAlign: 'right' }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSheetTrades.map((trade, idx) => {
-                const isExpanded = !!expandedRows[idx];
-                const isBuy = trade.action.toLowerCase() === 'buy';
-                const actionBadgeClass = isBuy ? 'badge-profit' : 'badge-loss';
-                
-                const isStrongBuy = trade.verdict.toLowerCase().includes('strong buy');
-                const isSellVerdict = trade.verdict.toLowerCase().includes('sell');
-                const isHoldVerdict = trade.verdict.toLowerCase().includes('hold');
-                
-                const verdictBadgeClass = isStrongBuy 
-                  ? 'badge-profit' 
-                  : isSellVerdict 
-                  ? 'badge-loss' 
-                  : isHoldVerdict 
-                  ? 'badge-warning' 
-                  : 'badge-info';
+          <div className="table-responsive">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Ticker</th>
+                  <th>Action</th>
+                  <th style={{ textAlign: 'right' }}>Price</th>
+                  <th style={{ textAlign: 'right' }}>Qty</th>
+                  <th>Verdict</th>
+                  <th>Reasoning Summary</th>
+                  <th style={{ textAlign: 'right' }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSheetTrades.map((trade, idx) => {
+                  const isExpanded = !!expandedRows[idx];
+                  const isBuy = trade.action.toLowerCase() === 'buy';
+                  const actionBadgeClass = isBuy ? 'badge-profit' : 'badge-loss';
+                  
+                  const isStrongBuy = trade.verdict.toLowerCase().includes('strong buy');
+                  const isSellVerdict = trade.verdict.toLowerCase().includes('sell');
+                  const isHoldVerdict = trade.verdict.toLowerCase().includes('hold');
+                  
+                  const verdictBadgeClass = isStrongBuy 
+                    ? 'badge-profit' 
+                    : isSellVerdict 
+                    ? 'badge-loss' 
+                    : isHoldVerdict 
+                    ? 'badge-warning' 
+                    : 'badge-info';
 
-                const urls = extractUrls(trade.reason);
+                  const urls = extractUrls(trade.reason);
 
-                return (
-                  <React.Fragment key={idx}>
-                    <tr 
-                      className={styles.expandableRow}
-                      onClick={() => toggleRow(idx)}
-                    >
-                      <td style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{trade.timestamp}</td>
-                      <td><span className="mono" style={{ fontWeight: 700 }}>{trade.ticker}</span></td>
-                      <td>
-                        <span className={`badge ${actionBadgeClass}`}>
-                          {trade.action.toUpperCase()}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{formatCurrency(trade.price)}</td>
-                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{trade.qty}</td>
-                      <td>
-                        <span className={`badge ${verdictBadgeClass}`}>
-                          {trade.verdict}
-                        </span>
-                      </td>
-                      <td>
-                        <div className={styles.truncatedReason}>{trade.reason}</div>
-                      </td>
-                      <td>
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </td>
-                    </tr>
-                    
-                    {isExpanded && (
-                      <tr className={styles.expandedDetails}>
-                        <td colSpan="8">
-                          <div className={styles.expandedContent}>
-                            <div>
-                              <strong style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>AI DECISION METRICS:</strong>
-                              <p className={styles.reasonText}>{trade.reason}</p>
-                            </div>
-
-                            <div className={styles.verifLinksSection}>
-                              <span className={styles.verifLinksTitle}>🔍 Source Verification Links</span>
-                              <div className={styles.verifLinksGrid}>
-                                {trade.verificationLink && (
-                                  <a 
-                                    href={trade.verificationLink}
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className={styles.verifLinkCard}
-                                    style={{ borderColor: 'var(--color-profit)', color: 'var(--color-profit)', fontWeight: 600 }}
-                                  >
-                                    Preferred Source Link <ExternalLink size={12} />
-                                  </a>
-                                )}
-                                <a 
-                                  href={`https://tavily.com/search?q=${trade.ticker}+stock+news+catalyst`}
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className={styles.verifLinkCard}
-                                >
-                                  Tavily Search <ExternalLink size={12} />
-                                </a>
-                                <a 
-                                  href={`https://news.google.com/search?q=${trade.ticker}+stock+news`}
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className={styles.verifLinkCard}
-                                >
-                                  Google News <ExternalLink size={12} />
-                                </a>
-                                <a 
-                                  href={`https://finance.yahoo.com/quote/${trade.ticker}`}
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className={styles.verifLinkCard}
-                                >
-                                  Yahoo Finance <ExternalLink size={12} />
-                                </a>
-                                
-                                {urls.map((url, uidx) => (
-                                  <a 
-                                    key={uidx}
-                                    href={url}
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className={styles.verifLinkCard}
-                                    style={{ borderColor: 'var(--color-profit)', color: 'var(--color-profit)' }}
-                                  >
-                                    Reference {uidx + 1} <ExternalLink size={12} />
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            {trade.orderId && (
-                              <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', gap: '8px' }}>
-                                <span>Alpaca Ref ID:</span>
-                                <span className="mono">{trade.orderId}</span>
-                              </div>
-                            )}
-                          </div>
+                  return (
+                    <React.Fragment key={idx}>
+                      <tr 
+                        className={styles.expandableRow}
+                        onClick={() => toggleRow(idx)}
+                      >
+                        <td style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{trade.timestamp}</td>
+                        <td><span className="mono" style={{ fontWeight: 700 }}>{trade.ticker}</span></td>
+                        <td>
+                          <span className={`badge ${actionBadgeClass}`}>
+                            {trade.action.toUpperCase()}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{formatCurrency(trade.price)}</td>
+                        <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{trade.qty}</td>
+                        <td>
+                          <span className={`badge ${verdictBadgeClass}`}>
+                            {trade.verdict}
+                          </span>
+                        </td>
+                        <td>
+                          <div className={styles.truncatedReason}>{trade.reason}</div>
+                        </td>
+                        <td>
+                          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </td>
                       </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+                      
+                      {isExpanded && (
+                        <tr className={styles.expandedDetails}>
+                          <td colSpan="8">
+                            <div className={styles.expandedContent}>
+                              <div>
+                                <strong style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>AI DECISION METRICS:</strong>
+                                <p className={styles.reasonText}>{trade.reason}</p>
+                              </div>
+
+                              <div className={styles.verifLinksSection}>
+                                <span className={styles.verifLinksTitle}>🔍 Source Verification Links</span>
+                                <div className={styles.verifLinksGrid}>
+                                  {trade.verificationLink && (
+                                    <a 
+                                      href={trade.verificationLink}
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className={styles.verifLinkCard}
+                                      style={{ borderColor: 'var(--color-profit)', color: 'var(--color-profit)', fontWeight: 600 }}
+                                    >
+                                      Preferred Source Link <ExternalLink size={12} />
+                                    </a>
+                                  )}
+                                  <a 
+                                    href={`https://tavily.com/search?q=${trade.ticker}+stock+news+catalyst`}
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className={styles.verifLinkCard}
+                                    style={{ borderColor: 'var(--border-card)' }}
+                                  >
+                                    Tavily Search <ExternalLink size={12} />
+                                  </a>
+                                  <a 
+                                    href={`https://news.google.com/search?q=${trade.ticker}+stock+news`}
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className={styles.verifLinkCard}
+                                  >
+                                    Google News <ExternalLink size={12} />
+                                  </a>
+                                  <a 
+                                    href={`https://finance.yahoo.com/quote/${trade.ticker}`}
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className={styles.verifLinkCard}
+                                  >
+                                    Yahoo Finance <ExternalLink size={12} />
+                                  </a>
+                                  
+                                  {urls.map((url, uidx) => (
+                                    <a 
+                                      key={uidx}
+                                      href={url}
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className={styles.verifLinkCard}
+                                      style={{ borderColor: 'var(--color-profit)', color: 'var(--color-profit)' }}
+                                    >
+                                      Reference {uidx + 1} <ExternalLink size={12} />
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                              
+                              {trade.orderId && (
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', gap: '8px' }}>
+                                  <span>Alpaca Ref ID:</span>
+                                  <span className="mono">{trade.orderId}</span>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>

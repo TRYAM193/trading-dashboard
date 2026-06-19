@@ -1,5 +1,7 @@
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
+import BottomNavbar from "@/components/BottomNavbar";
+import PageTransition from "@/components/PageTransition";
 import FetchInterceptor from "@/components/FetchInterceptor";
 
 export const metadata = {
@@ -15,8 +17,11 @@ export default function RootLayout({ children }) {
         <div className="app-layout">
           <Sidebar />
           <main className="main-content">
-            {children}
+            <PageTransition>
+              {children}
+            </PageTransition>
           </main>
+          <BottomNavbar />
         </div>
       </body>
     </html>

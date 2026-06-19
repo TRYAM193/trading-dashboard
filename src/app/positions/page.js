@@ -254,69 +254,71 @@ export default function PositionsMonitor() {
             No open stock positions found. AI scanner will evaluate trades at market open.
           </div>
         ) : (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Symbol</th>
-                <th>Sector</th>
-                <th style={{ textAlign: 'right' }}>Entry Price</th>
-                <th style={{ textAlign: 'right' }}>Current Price</th>
-                <th style={{ textAlign: 'right' }}>Shares</th>
-                <th style={{ textAlign: 'right' }}>Market Value</th>
-                <th style={{ textAlign: 'right' }}>Weight</th>
-                <th style={{ textAlign: 'right' }}>Unrealized P&L</th>
-              </tr>
-            </thead>
-            <tbody>
-              {processedPositions.map((pos) => {
-                const isProfit = pos.unrealizedPL >= 0;
-                const plColor = isProfit ? 'var(--color-profit)' : 'var(--color-loss)';
-                const sectorColor = SECTOR_COLORS[pos.sector] || '#8b8fa3';
-                
-                return (
-                  <tr 
-                    key={pos.symbol} 
-                    style={{ 
-                      background: isProfit 
-                        ? 'rgba(0, 212, 170, 0.015)' 
-                        : 'rgba(255, 71, 87, 0.015)' 
-                    }}
-                  >
-                    <td>
-                      <span className="mono" style={{ fontWeight: 700, fontSize: '15px' }}>{pos.symbol}</span>
-                    </td>
-                    <td>
-                      <span 
-                        className="badge" 
-                        style={{ 
-                          background: `${sectorColor}15`, 
-                          color: sectorColor,
-                          border: `1px solid ${sectorColor}30`,
-                          padding: '2px 8px',
-                          fontSize: '11px'
-                        }}
-                      >
-                        {pos.sector}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{formatCurrency(pos.avgEntry)}</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{formatCurrency(pos.currentPrice)}</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{pos.qty}</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 500 }}>{formatCurrency(pos.marketValue)}</td>
-                    <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
-                      {pos.weight.toFixed(1)}%
-                    </td>
-                    <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: plColor, fontWeight: 600 }}>
-                      <div>{isProfit ? '+' : ''}{formatCurrency(pos.unrealizedPL)}</div>
-                      <div style={{ fontSize: '11px', fontWeight: 500 }}>
-                        {isProfit ? '▲' : '▼'} {formatPercent(pos.unrealizedPLPct)}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="table-responsive">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Sector</th>
+                  <th style={{ textAlign: 'right' }}>Entry Price</th>
+                  <th style={{ textAlign: 'right' }}>Current Price</th>
+                  <th style={{ textAlign: 'right' }}>Shares</th>
+                  <th style={{ textAlign: 'right' }}>Market Value</th>
+                  <th style={{ textAlign: 'right' }}>Weight</th>
+                  <th style={{ textAlign: 'right' }}>Unrealized P&L</th>
+                </tr>
+              </thead>
+              <tbody>
+                {processedPositions.map((pos) => {
+                  const isProfit = pos.unrealizedPL >= 0;
+                  const plColor = isProfit ? 'var(--color-profit)' : 'var(--color-loss)';
+                  const sectorColor = SECTOR_COLORS[pos.sector] || '#8b8fa3';
+                  
+                  return (
+                    <tr 
+                      key={pos.symbol} 
+                      style={{ 
+                        background: isProfit 
+                          ? 'rgba(0, 212, 170, 0.015)' 
+                          : 'rgba(255, 71, 87, 0.015)' 
+                      }}
+                    >
+                      <td>
+                        <span className="mono" style={{ fontWeight: 700, fontSize: '15px' }}>{pos.symbol}</span>
+                      </td>
+                      <td>
+                        <span 
+                          className="badge" 
+                          style={{ 
+                            background: `${sectorColor}15`, 
+                            color: sectorColor,
+                            border: `1px solid ${sectorColor}30`,
+                            padding: '2px 8px',
+                            fontSize: '11px'
+                          }}
+                        >
+                          {pos.sector}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{formatCurrency(pos.avgEntry)}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{formatCurrency(pos.currentPrice)}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{pos.qty}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontWeight: 500 }}>{formatCurrency(pos.marketValue)}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+                        {pos.weight.toFixed(1)}%
+                      </td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', color: plColor, fontWeight: 600 }}>
+                        <div>{isProfit ? '+' : ''}{formatCurrency(pos.unrealizedPL)}</div>
+                        <div style={{ fontSize: '11px', fontWeight: 500 }}>
+                          {isProfit ? '▲' : '▼'} {formatPercent(pos.unrealizedPLPct)}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 

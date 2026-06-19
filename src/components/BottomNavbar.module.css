@@ -1,0 +1,61 @@
+.bottomNav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .bottomNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-card);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+    padding: 0 8px;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .navLink {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    flex: 1;
+    height: 100%;
+  }
+
+  .navIcon {
+    color: inherit;
+    transition: transform 0.2s ease;
+  }
+
+  .navLink:hover {
+    color: var(--text-primary);
+  }
+
+  .navLink.active {
+    color: var(--text-primary);
+  }
+
+  .navLink.active .navIcon {
+    color: #667eea;
+    transform: scale(1.1);
+  }
+
+  .navLabel {
+    font-size: 9px;
+    letter-spacing: 0.2px;
+  }
+}
