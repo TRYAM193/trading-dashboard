@@ -40,6 +40,8 @@ export default function CopilotChat() {
   const [mode, setMode] = useState('chat'); // 'chat' or 'voice'
   const [continuousMode, setContinuousMode] = useState(false);
   const [voiceTranscript, setVoiceTranscript] = useState('');
+  const [expandedMessages, setExpandedMessages] = useState({});
+  const [loadingTaskText, setLoadingTaskText] = useState('Assistant is analyzing request...');
 
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -84,6 +86,34 @@ export default function CopilotChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
+
+  // Rotate task text during loading
+  useEffect(() => {
+    if (!loading) return;
+    const tasks = [
+      'Analyzing request instructions...',
+      'Checking Google Sheets master ledger...',
+      'Retrieving active portfolio assets from Alpaca...',
+      'Consulting web search for news catalysts...',
+      'Evaluating portfolio risk limits...',
+      'Updating Sheets trade logging rows...',
+      'Synthesizing final ReAct decisions...'
+    ];
+    let idx = 0;
+    setLoadingTaskText(tasks[0]);
+    const interval = setInterval(() => {
+      idx = (idx + 1) % tasks.length;
+      setLoadingTaskText(tasks[idx]);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  const toggleMessageSteps = (idx) => {
+    setExpandedMessages(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
+    }));
+  };
 
   // VAD Audio Controls
   const stopVAD = () => {
@@ -394,7 +424,7 @@ export default function CopilotChat() {
       const data = await res.json();
       
       if (res.ok) {
-        setMessages(prev => [...prev, { role: 'model', content: data.reply }]);
+        setMessages(prev => [...prev, { role: 'model', content: data.reply, steps: data.executionSteps }]);
         if (data.toolLogs && data.toolLogs.length > 0) {
           setToolLogs(data.toolLogs);
         }
@@ -555,6 +585,9 @@ export default function CopilotChat() {
               <div className={styles.messageList}>
                 {messages.map((msg, index) => {
                   const isUser = msg.role === 'user';
+                  const hasSteps = !isUser && msg.steps && msg.steps.length > 0;
+                  const isExpanded = !!expandedMessages[index];
+
                   return (
                     <div 
                       key={index} 
@@ -569,6 +602,71 @@ export default function CopilotChat() {
                             <p key={i}>{line}</p>
                           ))}
                         </div>
+
+                        {/* Agentic UI: Expandable Step-by-Step execution trail */}
+                        {hasSteps && (
+                          <div className={styles.agentStepsToggle}>
+                            <button 
+                              type="button" 
+                              onClick={() => toggleMessageSteps(index)}
+                              className={styles.stepsToggleBtn}
+                            >
+                              {isExpanded ? '▼ Hide Agent Action Steps' : '▶ View Agent Action Steps'}
+                            </button>
+                            
+                            {isExpanded && (
+                              <div className={styles.agentStepsContainer}>
+                                {msg.steps.map((step, sIdx) => {
+                                  const isSearch = step.toolCall?.name === 'web_search';
+                                  const isSheets = step.toolCall?.name === 'log_custom_trade_record';
+                                  const isOrder = step.toolCall?.name?.startsWith('place_');
+                                  const isPortfolio = step.toolCall?.name === 'get_portfolio_status' || step.toolCall?.name === 'get_trade_history';
+                                  const isQuote = step.toolCall?.name === 'get_stock_quote';
+
+                                  let badgeText = 'ReAct Decision';
+                                  let badgeClass = styles.badgeDecision;
+                                  if (isSearch) { badgeText = '🔍 Web Search'; badgeClass = styles.badgeSearch; }
+                                  else if (isSheets) { badgeText = '📝 Sheets Ledger'; badgeClass = styles.badgeSheets; }
+                                  else if (isOrder) { badgeText = '⚡ Trade Order'; badgeClass = styles.badgeOrder; }
+                                  else if (isPortfolio) { badgeText = '📊 Portfolio'; badgeClass = styles.badgePortfolio; }
+                                  else if (isQuote) { badgeText = '📈 Price Quote'; badgeClass = styles.badgeQuote; }
+
+                                  return (
+                                    <div key={sIdx} className={styles.agentStepItem}>
+                                      <div className={styles.stepHeader}>
+                                        <span className={styles.stepNum}>Step {step.iteration}:</span>
+                                        <span className={`${styles.stepBadge} ${badgeClass}`}>{badgeText}</span>
+                                        {step.toolCall && (
+                                          <span className={styles.stepToolName}>({step.toolCall.name})</span>
+                                        )}
+                                      </div>
+                                      
+                                      {step.thought && (
+                                        <div className={styles.stepThought}>
+                                          <strong>Reasoning:</strong> {step.thought}
+                                        </div>
+                                      )}
+
+                                      {step.toolCall && (
+                                        <div className={styles.stepDetails}>
+                                          <details className={styles.jsonDetails}>
+                                            <summary className={styles.jsonSummary}>View Tool Parameters & Outputs</summary>
+                                            <pre className={styles.stepCode}>
+                                              {JSON.stringify({
+                                                arguments: step.toolCall.args,
+                                                output: step.toolResult
+                                              }, null, 2)}
+                                            </pre>
+                                          </details>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -585,7 +683,7 @@ export default function CopilotChat() {
                         <span></span>
                         <span></span>
                       </div>
-                      <span className={styles.loadingText}>Secretary is executing commands...</span>
+                      <span className={styles.loadingText}>{loadingTaskText}</span>
                     </div>
                   </div>
                 )}

@@ -462,6 +462,7 @@ ${recentTrades.length > 0
     const maxIterations = 3;
     let finalReply = '';
     const toolExecLogs = [];
+    const executionSteps = [];
 
     while (iteration < maxIterations) {
       iteration++;
@@ -499,6 +500,7 @@ Available Tools:
 - place_buy_order: args: { "symbol": "TICKER", "qty": quantity }. Place a market buy order for a stock.
 - place_sell_order: args: { "symbol": "TICKER" }. Sell/liquidate all shares of an owned stock.
 - web_search: args: { "query": "search query" }. Search the web for latest stock news, company catalysts, or general research before buying/selling/holding.
+- log_custom_trade_record: args: { "ticker": "TICKER", "action": "BUY/SELL", "price": number, "quantity": number, "ai_verdict": "STRONG BUY/SELL/HOLD", "ai_reason": "why trade was taken", "verification_link": "optional url" }. Write/append a custom manual or simulated trade row to the ledger.
 `;
 
       // Call Groq API
@@ -544,6 +546,7 @@ Available Tools:
 
       const { thought, toolCall, reply } = parsed;
       finalReply = reply;
+      let toolResult = null;
 
       if (toolCall && toolCall.name && tools[toolCall.name]) {
         // Execute the tool
@@ -556,15 +559,26 @@ Available Tools:
         });
 
         // Run the tool function
-        const toolResult = await tools[toolCall.name](toolCall.args || {});
+        toolResult = await tools[toolCall.name](toolCall.args || {});
         
         // Add tool results as a user role message to the LLM (ReAct feedback loop)
         messagesContext.push({
           role: 'user',
           content: `[TOOL OUTPUT from ${toolCall.name}]: ${JSON.stringify(toolResult)}`
         });
-      } else {
-        // No tool call requested, we are done
+      }
+
+      // Record detailed step
+      executionSteps.push({
+        iteration,
+        thought: thought || '',
+        reply: reply || '',
+        toolCall: toolCall || null,
+        toolResult: toolResult
+      });
+
+      // Break loop if no tool called
+      if (!toolCall) {
         break;
       }
     }
@@ -572,6 +586,7 @@ Available Tools:
     return NextResponse.json({
       reply: finalReply,
       toolLogs: toolExecLogs,
+      executionSteps: executionSteps,
       history: messagesContext
     });
 
@@ -580,6 +595,7 @@ Available Tools:
     return NextResponse.json({
       reply: `I apologize, but I encountered an error while processing your request: ${err.message}`,
       toolLogs: [],
+      executionSteps: [],
       history: history
     }, { status: 500 });
   }

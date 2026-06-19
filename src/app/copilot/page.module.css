@@ -1049,3 +1049,139 @@
   }
 }
 
+/* Agentic UI Steps */
+.agentStepsToggle {
+  margin-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 8px;
+}
+
+.stepsToggleBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-info);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stepsToggleBtn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: var(--text-primary);
+}
+
+.agentStepsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+  animation: slideDownSteps 0.25s ease-out;
+}
+
+@keyframes slideDownSteps {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.agentStepItem {
+  border-left: 2px solid rgba(255, 255, 255, 0.1);
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.agentStepItem:hover {
+  border-left-color: var(--color-info);
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.stepNum {
+  font-weight: bold;
+  color: var(--text-secondary);
+}
+
+.stepBadge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badgeDecision { background: rgba(255, 255, 255, 0.08); color: var(--text-primary); }
+.badgeSearch { background: rgba(0, 212, 170, 0.15); color: var(--color-info); border: 1px solid rgba(0, 212, 170, 0.25); }
+.badgeSheets { background: rgba(247, 183, 49, 0.15); color: #f1c40f; border: 1px solid rgba(247, 183, 49, 0.25); }
+.badgeOrder { background: rgba(255, 71, 87, 0.15); color: var(--color-loss); border: 1px solid rgba(255, 71, 87, 0.25); }
+.badgePortfolio { background: rgba(102, 126, 234, 0.15); color: #9b59b6; border: 1px solid rgba(102, 126, 234, 0.25); }
+.badgeQuote { background: rgba(46, 213, 115, 0.15); color: var(--color-success); border: 1px solid rgba(46, 213, 115, 0.25); }
+
+.stepToolName {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.stepThought {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #a8b2c1;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 2px solid var(--color-info);
+}
+
+.stepDetails {
+  font-size: 0.7rem;
+}
+
+.jsonDetails {
+  cursor: pointer;
+}
+
+.jsonSummary {
+  color: var(--text-secondary);
+  font-weight: 500;
+  outline: none;
+  padding: 2px 0;
+  transition: color 0.2s;
+}
+
+.jsonSummary:hover {
+  color: var(--text-primary);
+}
+
+.stepCode {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  border-radius: 6px;
+  color: #e0e6ed;
+  font-family: 'JetBrains Mono', monospace;
+  margin: 4px 0 0 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
