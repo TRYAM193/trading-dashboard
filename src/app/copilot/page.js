@@ -47,6 +47,17 @@ export default function CopilotChat() {
   const continuousModeRef = useRef(continuousMode);
   const isMutedRef = useRef(isMuted);
 
+  // Web Audio VAD Refs & State
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const streamRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const lastSpeechTimeRef = useRef(0);
+  const speechDetectedRef = useRef(false);
+
+  const [orbScale, setOrbScale] = useState(1);
+  const [softVoice, setSoftVoice] = useState(null);
+
   // Sync refs to avoid closure traps in event callbacks
   useEffect(() => {
     modeRef.current = mode;
@@ -68,6 +79,147 @@ export default function CopilotChat() {
     scrollToBottom();
   }, [messages, loading]);
 
+  // VAD Audio Controls
+  const stopVAD = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (streamRef.current) {
+      try {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      } catch (e) {
+        console.error(e);
+      }
+      streamRef.current = null;
+    }
+    if (audioContextRef.current) {
+      try {
+        if (audioContextRef.current.state !== 'closed') {
+          audioContextRef.current.close();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+    setOrbScale(1);
+  };
+
+  const startVAD = async () => {
+    try {
+      stopVAD(); // Clean up existing context before starting
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+
+      const audioCtx = new AudioContextClass();
+      audioContextRef.current = audioCtx;
+
+      const source = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256; // Fast analysis
+      analyserRef.current = analyser;
+
+      source.connect(analyser);
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      lastSpeechTimeRef.current = Date.now();
+      speechDetectedRef.current = false;
+
+      const checkVolume = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          sum += dataArray[i] * dataArray[i];
+        }
+        const rms = Math.sqrt(sum / bufferLength);
+
+        // Normalize RMS volume (0-255) to a scale factor for the orb (1.0 to 1.25)
+        const normalizedVol = Math.min(rms / 40, 1);
+        const targetScale = 1 + normalizedVol * 0.25;
+
+        // Smooth output to avoid visual jittering
+        setOrbScale(prev => prev + (targetScale - prev) * 0.2);
+
+        const now = Date.now();
+        // VAD threshold (RMS > 6 represents audible speech)
+        if (rms > 6) {
+          lastSpeechTimeRef.current = now;
+          if (!speechDetectedRef.current) {
+            speechDetectedRef.current = true;
+          }
+        } else {
+          // If user was speaking and is now silent for > 1500ms, auto-stop mic
+          if (speechDetectedRef.current && (now - lastSpeechTimeRef.current > 1500)) {
+            console.log("VAD: Silence detected. Auto-finalizing speech recognition.");
+            if (recognitionRef.current) {
+              try {
+                recognitionRef.current.stop();
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            stopVAD();
+            return;
+          }
+        }
+
+        animationFrameRef.current = requestAnimationFrame(checkVolume);
+      };
+
+      animationFrameRef.current = requestAnimationFrame(checkVolume);
+    } catch (err) {
+      console.warn("VAD / Web Audio API initialization failed:", err);
+    }
+  };
+
+  // Load and select soft voice
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+    const findSoftVoice = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) return;
+
+      // Prioritized keywords for warmer/softer natural female/assistant voices
+      const candidates = ['aria', 'zira', 'samantha', 'hazel', 'google us', 'google uk', 'natural', 'female'];
+      let selected = null;
+
+      for (const keyword of candidates) {
+        selected = voices.find(v => 
+          v.lang.startsWith('en') && 
+          v.name.toLowerCase().includes(keyword)
+        );
+        if (selected) break;
+      }
+
+      if (!selected) {
+        selected = voices.find(v => v.lang.startsWith('en')) || voices[0];
+      }
+
+      console.log('Selected Assistant Voice:', selected?.name);
+      setSoftVoice(selected);
+    };
+
+    findSoftVoice();
+    window.speechSynthesis.onvoiceschanged = findSoftVoice;
+
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
+  }, []);
+
   // Load settings & Initialize Speech Recognition
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -83,11 +235,18 @@ export default function CopilotChat() {
         rec.interimResults = false;
         rec.lang = 'en-US';
 
-        rec.onstart = () => setIsListening(true);
-        rec.onend = () => setIsListening(false);
+        rec.onstart = () => {
+          setIsListening(true);
+          startVAD();
+        };
+        rec.onend = () => {
+          setIsListening(false);
+          stopVAD();
+        };
         rec.onerror = (e) => {
           console.error('Speech recognition error:', e);
           setIsListening(false);
+          stopVAD();
         };
         rec.onresult = (event) => {
           const text = event.results[0][0].transcript;
@@ -105,6 +264,7 @@ export default function CopilotChat() {
       if (typeof window !== 'undefined' && window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
+      stopVAD();
     };
   }, []);
 
@@ -120,6 +280,14 @@ export default function CopilotChat() {
       .replace(/[*#`_\-]/g, "");
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
+    
+    if (softVoice) {
+      utterance.voice = softVoice;
+    }
+    
+    // Softer, calmer speech tuning parameters
+    utterance.pitch = 1.02; // Warm, friendly pitch
+    utterance.rate = 0.92;  // Gentle, slower delivery rate
     
     utterance.onstart = () => {
       setIsSpeaking(true);
@@ -491,6 +659,7 @@ export default function CopilotChat() {
                 }`}
                 onClick={toggleListening}
                 title="Tap to speak"
+                style={{ transform: `scale(${orbScale})` }}
               >
                 <div className={styles.orbOuter}></div>
                 <div className={styles.orbInner}>
