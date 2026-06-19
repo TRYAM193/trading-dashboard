@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Trading Copilot</string>
+    <string name="title_activity_main">Trading Copilot</string>
+    <string name="package_name">com.trading.copilot</string>
+    <string name="custom_url_scheme">com.trading.copilot</string>
+</resources>
