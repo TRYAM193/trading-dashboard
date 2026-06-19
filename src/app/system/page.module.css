@@ -156,4 +156,13 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
+  .connCard {
+    padding: 12px;
+  }
+  .connStatusText {
+    font-size: 13px;
+  }
+  .connLabel {
+    font-size: 11px;
+  }
 }

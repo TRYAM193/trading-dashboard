@@ -193,10 +193,23 @@
 
 @media (max-width: 768px) {
   .metricsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+  .metricCard {
+    padding: 12px;
+    min-height: 90px;
+  }
+  .metricValue {
+    font-size: 18px;
+    margin-top: 6px;
+  }
+  .metricHeader {
+    font-size: 11px;
   }
   .filterRow {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
 }

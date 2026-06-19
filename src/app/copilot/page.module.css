@@ -618,7 +618,7 @@
 
 @media (max-width: 768px) {
   .container {
-    height: calc(100vh - 64px);
+    height: calc(100dvh - 96px); /* Fits exactly inside main-content padded viewport */
     padding: 12px;
     gap: 12px;
     overflow: hidden;
@@ -649,13 +649,15 @@
   .workspace {
     flex-direction: column;
     overflow: hidden;
-    height: calc(100% - 100px);
+    flex: 1;
+    min-height: 0;
+    height: auto;
   }
   .chatContainer {
     flex: 1;
-    height: 100%;
     padding: 12px;
     overflow: hidden;
+    height: auto;
   }
   .toolConsole {
     display: none;

@@ -246,6 +246,21 @@
   .kpiCard:first-child {
     grid-column: span 2;
   }
+  .kpiCard {
+    padding: 12px;
+    min-height: 110px;
+  }
+  .kpiValue {
+    font-size: 18px;
+    margin-top: 8px;
+  }
+  .kpiHeader {
+    font-size: 11px;
+  }
+  .kpiIconWrapper {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 .summaryCard {

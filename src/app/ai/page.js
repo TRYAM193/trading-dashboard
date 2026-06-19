@@ -208,7 +208,7 @@ export default function AIIntelligence() {
       </section>
 
       {/* Main Layout Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', alignItems: 'flex-start' }}>
+      <div className={styles.aiMainLayout}>
         
         {/* Decision Feed */}
         <section className={styles.decisionFeed}>

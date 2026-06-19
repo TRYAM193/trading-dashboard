@@ -213,14 +213,39 @@
   height: 320px;
 }
 
+.aiMainLayout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  align-items: flex-start;
+}
+
 @media (max-width: 992px) {
-  .verifLinksGrid {
+  .aiMainLayout {
     grid-template-columns: 1fr;
+  }
+  .verifLinksGrid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
   .metricsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+  .metricCard {
+    padding: 12px;
+    min-height: 90px;
+  }
+  .metricValue {
+    font-size: 18px;
+    margin-top: 6px;
+  }
+  .metricHeader {
+    font-size: 11px;
+  }
+  .verifLinksGrid {
     grid-template-columns: 1fr;
   }
 }

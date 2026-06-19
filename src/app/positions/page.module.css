@@ -190,4 +190,18 @@
   .gateItem:last-child {
     grid-column: span 2;
   }
+  .gateItem {
+    padding: 12px;
+    gap: 8px;
+  }
+  .gateValue {
+    font-size: 15px;
+  }
+  .gateIconLabel {
+    font-size: 11px;
+    gap: 6px;
+  }
+  .gateStatusRow {
+    font-size: 10px;
+  }
 }
