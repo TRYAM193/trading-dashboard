@@ -24,7 +24,7 @@ export default function CopilotChat() {
   const [messages, setMessages] = useState([
     {
       role: 'model',
-      content: 'Hello! I am your AI Secretary and Portfolio Copilot. I can help you query your portfolio status, interrogate past trading decisions, check stock quotes, or execute buy/sell orders. What would you like me to do today?'
+      content: 'Hello! I am your Personal Assistant and Portfolio Copilot. 🧑‍💼 I am here to help you manage your trading terminal, audit your portfolios, check quotes, or execute orders. What can I do for you today?'
     }
   ]);
   const [input, setInput] = useState('');
