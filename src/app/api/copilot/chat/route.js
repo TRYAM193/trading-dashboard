@@ -603,6 +603,10 @@ Available Tools:
 
       // Break loop if no tool called
       if (!toolCall) {
+        messagesContext.push({
+          role: 'model',
+          content: rawText
+        });
         break;
       }
     }
