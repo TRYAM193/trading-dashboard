@@ -240,7 +240,11 @@
 
 @media (max-width: 768px) {
   .kpiGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .kpiCard:first-child {
+    grid-column: span 2;
   }
 }
 

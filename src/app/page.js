@@ -160,7 +160,7 @@ export default function PortfolioOverview() {
   return (
     <div className="animate-fade">
       <header className={styles.dashboardHeader}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="header-container">
           <div>
             <h1 className="page-title">Portfolio Overview</h1>
             <p className="section-title" style={{ marginBottom: 0, fontSize: '12px' }}>

@@ -181,7 +181,7 @@ export default function TradeHistory() {
   return (
     <div className="animate-fade">
       <header className={styles.historyHeader}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="header-container">
           <div>
             <h1 className="page-title">Trade History & Analytics</h1>
             <p className="section-title" style={{ marginBottom: 0, fontSize: '12px' }}>

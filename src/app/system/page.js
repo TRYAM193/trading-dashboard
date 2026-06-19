@@ -65,7 +65,7 @@ export default function SystemStatus() {
   return (
     <div className="animate-fade">
       <header className={styles.systemHeader}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="header-container">
           <div>
             <h1 className="page-title">System & Workflow Status</h1>
             <p className="section-title" style={{ marginBottom: 0, fontSize: '12px' }}>

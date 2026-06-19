@@ -200,7 +200,7 @@ export default function PositionsMonitor() {
   return (
     <div className="animate-fade">
       <header className={styles.positionsHeader}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="header-container">
           <div>
             <h1 className="page-title">Positions & Risk Monitor</h1>
             <p className="section-title" style={{ marginBottom: 0, fontSize: '12px' }}>

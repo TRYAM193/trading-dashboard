@@ -241,6 +241,14 @@ html, body {
   margin-bottom: 16px;
 }
 
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
 @media (max-width: 1200px) {
   .grid-5 { grid-template-columns: repeat(3, 1fr); }
   .grid-6 { grid-template-columns: repeat(3, 1fr); }
@@ -259,5 +267,13 @@ html, body {
   .page-title {
     font-size: 22px !important;
     margin-bottom: 16px !important;
+  }
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .header-container > div:last-child {
+    align-self: flex-end;
   }
 }
