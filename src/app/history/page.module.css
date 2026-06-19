@@ -1,0 +1,202 @@
+.historyHeader {
+  margin-bottom: 24px;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metricCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 110px;
+  transition: all 0.3s ease;
+}
+
+.metricHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.metricValue {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.chartCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.chartTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chartWrapper {
+  width: 100%;
+  height: 250px;
+}
+
+/* Filters Section */
+.filterRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.filterInput {
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-size: 14px;
+  outline: none;
+  min-width: 200px;
+  transition: border-color 0.2s ease;
+}
+
+.filterInput:focus {
+  border-color: var(--color-info);
+}
+
+.filterSelect {
+  background: var(--bg-input);
+  border: 1px solid var(--border-card);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  min-width: 120px;
+}
+
+/* Table styling and expand/collapse */
+.tableCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.expandableRow {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.expandedDetails {
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.expandedContent {
+  padding: 20px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reasonText {
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.verifLinksSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 12px;
+}
+
+.verifLinksTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.verifLinksGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.verifLinkCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--color-info);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.verifLinkCard:hover {
+  background: rgba(102, 126, 234, 0.08);
+  border-color: var(--color-info);
+}
+
+.truncatedReason {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-secondary);
+}
+
+/* Skeletons */
+.skeletonMetrics {
+  height: 110px;
+}
+
+.skeletonChart {
+  height: 314px;
+}
+
+.skeletonTable {
+  height: 400px;
+}
+
+@media (max-width: 768px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+  .filterRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

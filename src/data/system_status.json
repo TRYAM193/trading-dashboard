@@ -1,0 +1,56 @@
+{
+  "workflows": [
+    {
+      "id": "KIlf2jizGE70Dgww",
+      "name": "Offensive Buy Scanner",
+      "active": true,
+      "schedule": "9:30 AM EST Mon-Fri",
+      "lastRun": "2026-06-18T14:17:43.403Z",
+      "lastStatus": "error",
+      "nextRun": "2026-06-19T03:30:00.000Z"
+    },
+    {
+      "id": "bG6SCkPg5uLlBZEu",
+      "name": "Defensive Sell",
+      "active": true,
+      "schedule": "Every 15 min during market hours",
+      "lastRun": "2026-06-18T10:30:00.017Z",
+      "lastStatus": "error",
+      "nextRun": "2026-06-18T10:45:00.000Z"
+    },
+    {
+      "id": "JvusSgcqitzUASW5",
+      "name": "Daily Performance Summary",
+      "active": true,
+      "schedule": "4:15 PM EST Mon-Fri",
+      "lastRun": null,
+      "lastStatus": "waiting",
+      "nextRun": "2026-06-18T16:15:00.000Z"
+    },
+    {
+      "id": "k57DUy4bFLaNhqG3",
+      "name": "Weekly Rebalance Alert",
+      "active": true,
+      "schedule": "Sunday 6:00 PM EST",
+      "lastRun": null,
+      "lastStatus": "waiting",
+      "nextRun": "2026-06-21T18:00:00.000Z"
+    }
+  ],
+  "recentErrors": [
+    {
+      "timestamp": "2026-06-18T14:17:52.398Z",
+      "workflowId": "KIlf2jizGE70Dgww",
+      "workflowName": "Offensive Buy Scanner",
+      "node": "Momentum Analysis",
+      "message": "Alpaca API rate limit reached during price history retrieval"
+    },
+    {
+      "timestamp": "2026-06-18T10:30:06.026Z",
+      "workflowId": "bG6SCkPg5uLlBZEu",
+      "workflowName": "Defensive Sell",
+      "node": "Check Ownership",
+      "message": "Failed to authenticate with Alpaca paper trading credentials"
+    }
+  ]
+}

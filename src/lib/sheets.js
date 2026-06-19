@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 const API_KEY = process.env.GOOGLE_API_KEY;
 
@@ -42,5 +45,51 @@ export async function getTradesFromSheet() {
   } catch (err) {
     console.error('Sheets API error:', err);
     return [];
+  }
+}
+
+const getManualTradesPath = () => path.join(process.cwd(), 'src', 'data', 'manual_trades.json');
+
+export function getManualTrades() {
+  try {
+    const filePath = getManualTradesPath();
+    if (!fs.existsSync(filePath)) {
+      // Ensure directory exists
+      const dirPath = path.dirname(filePath);
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+      fs.writeFileSync(filePath, JSON.stringify([], null, 2));
+      return [];
+    }
+    const content = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(content || '[]');
+  } catch (err) {
+    console.error('Failed to read manual trades:', err.message);
+    return [];
+  }
+}
+
+export function saveManualTrade(trade) {
+  try {
+    const filePath = getManualTradesPath();
+    const trades = getManualTrades();
+    const updatedTrade = {
+      Timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      ...trade
+    };
+    trades.push(updatedTrade);
+    
+    // Ensure directory exists
+    const dirPath = path.dirname(filePath);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+    
+    fs.writeFileSync(filePath, JSON.stringify(trades, null, 2));
+    return updatedTrade;
+  } catch (err) {
+    console.error('Failed to save manual trade:', err.message);
+    throw err;
   }
 }

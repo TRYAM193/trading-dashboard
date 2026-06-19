@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  // Dynamic Next.js build configuration (Vercel-ready)
 };
 
 export default nextConfig;

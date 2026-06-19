@@ -1,0 +1,13 @@
+[
+  {
+    "Timestamp": "2026-06-18 16:38:55",
+    "Ticker": "AAPL",
+    "Action": "SELL",
+    "Price": "297.56",
+    "Quantity": "10",
+    "AI Verdict": "MANUAL SELL",
+    "AI Reason": "Manual liquidation executed by user via Copilot Chat.",
+    "Order ID": "3da9d012-f0f3-4567-8496-f1a681db65c5",
+    "Verification Link": "https://finance.yahoo.com/quote/AAPL"
+  }
+]
