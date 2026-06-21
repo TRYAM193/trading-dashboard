@@ -48,7 +48,13 @@ export async function getTradesFromSheet() {
   }
 }
 
-const getManualTradesPath = () => path.join(process.cwd(), 'src', 'data', 'manual_trades.json');
+const getManualTradesPath = () => {
+  if (process.env.VERCEL) {
+    // Vercel serverless has a read-only filesystem except for /tmp
+    return path.join('/tmp', 'manual_trades.json');
+  }
+  return path.join(process.cwd(), 'src', 'data', 'manual_trades.json');
+};
 
 export function getManualTrades() {
   try {
