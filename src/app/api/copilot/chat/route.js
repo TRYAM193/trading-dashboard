@@ -391,15 +391,51 @@ async function scrapeDuckDuckGo(query) {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { message, history = [] } = body;
+    const { message, history = [], aiEngine = 'gemini' } = body;
 
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    const API_KEY = process.env.GROQ_API_KEY;
+    // Delegate to n8n Secretary Agent Webhook
+    try {
+      const n8nUrl = 'https://n8n.tryam193.in/webhook/copilot-chat';
+      const n8nRes = await fetch(n8nUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: message,
+          conversationId: 'a8cae14d-a578-4604-aa95-692133b05a52'
+        })
+      });
+
+      if (n8nRes.ok) {
+        const n8nData = await n8nRes.json();
+        const replyText = n8nData.answer || n8nData.output || 'No response generated.';
+        
+        // Format history context for client-side state
+        const updatedHistory = [
+          ...history,
+          { role: 'user', content: message },
+          { role: 'model', content: JSON.stringify({ thought: 'n8n delegation', toolCall: null, reply: replyText }) }
+        ];
+
+        return NextResponse.json({
+          reply: replyText,
+          toolLogs: [],
+          executionSteps: [],
+          history: updatedHistory
+        });
+      } else {
+        console.warn("n8n Webhook returned non-2xx status, falling back to local ReAct agent:", n8nRes.status);
+      }
+    } catch (n8nErr) {
+      console.error("Failed to route chat to n8n, falling back to local ReAct agent:", n8nErr);
+    }
+
+    const API_KEY = aiEngine === 'gemini' ? process.env.GEMINI_API_KEY : process.env.GROQ_API_KEY;
     if (!API_KEY) {
-      return NextResponse.json({ error: 'GROQ_API_KEY is not configured on the server.' }, { status: 500 });
+      return NextResponse.json({ error: `${aiEngine === 'gemini' ? 'GEMINI_API_KEY' : 'GROQ_API_KEY'} is not configured on the server.` }, { status: 500 });
     }
 
     // Fetch live Google Sheet Trades + Account Status dynamically
@@ -527,15 +563,23 @@ Available Tools:
 - log_custom_trade_record: args: { "ticker": "TICKER", "action": "BUY/SELL", "price": number, "quantity": number, "ai_verdict": "STRONG BUY/SELL/HOLD", "ai_reason": "why trade was taken", "verification_link": "optional url" }. Write/append a custom manual or simulated trade row to the ledger.
 `;
 
-      // Call Groq API
-      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      let apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      let modelName = 'llama-3.3-70b-versatile';
+
+      if (aiEngine === 'gemini') {
+        apiUrl = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+        modelName = 'gemini-2.5-flash';
+      }
+
+      // Call LLM API
+      const llmRes = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${API_KEY}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: modelName,
           messages: [
             { role: 'system', content: systemInstruction },
             ...messagesContext.map(m => ({
@@ -548,16 +592,16 @@ Available Tools:
         })
       });
 
-      if (!groqRes.ok) {
-        const errText = await groqRes.text();
-        throw new Error(`Groq API Error: ${errText}`);
+      if (!llmRes.ok) {
+        const errText = await llmRes.text();
+        throw new Error(`${aiEngine === 'gemini' ? 'Gemini' : 'Groq'} API Error: ${errText}`);
       }
 
-      const groqData = await groqRes.json();
-      const rawText = groqData.choices?.[0]?.message?.content;
+      const llmData = await llmRes.json();
+      const rawText = llmData.choices?.[0]?.message?.content;
       
       if (!rawText) {
-        throw new Error('Empty response from Groq API.');
+        throw new Error(`Empty response from ${aiEngine === 'gemini' ? 'Gemini' : 'Groq'} API.`);
       }
 
       let parsed = null;

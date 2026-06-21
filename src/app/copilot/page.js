@@ -34,6 +34,8 @@ export default function CopilotChat() {
   const [serverUrl, setServerUrl] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [tempUrl, setTempUrl] = useState('');
+  const [aiEngine, setAiEngine] = useState('gemini');
+  const [tempEngine, setTempEngine] = useState('gemini');
 
   // Voice Mode & Animation States
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -268,8 +270,11 @@ export default function CopilotChat() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedUrl = window.localStorage.getItem('trading_copilot_server_url') || '';
+      const savedEngine = window.localStorage.getItem('trading_copilot_ai_engine') || 'gemini';
       setServerUrl(savedUrl);
       setTempUrl(savedUrl);
+      setAiEngine(savedEngine);
+      setTempEngine(savedEngine);
 
       // Initialize Web Speech API
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -417,7 +422,8 @@ export default function CopilotChat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: messageText,
-          history: historyPayload
+          history: historyPayload,
+          aiEngine: aiEngine
         })
       });
 
@@ -466,7 +472,9 @@ export default function CopilotChat() {
     e.preventDefault();
     const cleanUrl = tempUrl.trim().replace(/\/$/, '');
     window.localStorage.setItem('trading_copilot_server_url', cleanUrl);
+    window.localStorage.setItem('trading_copilot_ai_engine', tempEngine);
     setServerUrl(cleanUrl);
+    setAiEngine(tempEngine);
     setShowSettings(false);
   };
 
@@ -551,7 +559,7 @@ export default function CopilotChat() {
             </div>
             <form onSubmit={saveSettings} className={styles.settingsForm}>
               <p className={styles.settingsHelp}>
-                Enter the absolute hosted base URL of your Trading Copilot dashboard (e.g. <code>https://your-app.vercel.app</code>). Leave blank to use local relative requests.
+                Configure server URL and default AI assistant intelligence engine.
               </p>
               <div className={styles.settingsInputGroup}>
                 <label>Server Base URL</label>
@@ -563,8 +571,29 @@ export default function CopilotChat() {
                   className={styles.settingsInput}
                 />
               </div>
+              <div className={styles.settingsInputGroup} style={{ marginTop: '12px' }}>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}>AI Assistant Engine</label>
+                <select
+                  value={tempEngine}
+                  onChange={(e) => setTempEngine(e.target.value)}
+                  style={{
+                    background: 'var(--bg-input)',
+                    color: 'var(--text-primary)',
+                    width: '100%',
+                    height: '40px',
+                    padding: '8px 12px',
+                    border: '1px solid var(--border-card)',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    outline: 'none'
+                  }}
+                >
+                  <option value="gemini">Google Gemini 2.5 Flash (Recommended)</option>
+                  <option value="groq">Groq Llama 3.3 70B</option>
+                </select>
+              </div>
               <div className={styles.settingsFormActions}>
-                <button type="button" onClick={() => { setTempUrl(''); window.localStorage.setItem('trading_copilot_server_url', ''); setServerUrl(''); setShowSettings(false); }} className={styles.settingsReset}>
+                <button type="button" onClick={() => { setTempUrl(''); setTempEngine('gemini'); window.localStorage.setItem('trading_copilot_server_url', ''); window.localStorage.setItem('trading_copilot_ai_engine', 'gemini'); setServerUrl(''); setAiEngine('gemini'); setShowSettings(false); }} className={styles.settingsReset}>
                   Reset
                 </button>
                 <button type="submit" className={styles.settingsSave}>

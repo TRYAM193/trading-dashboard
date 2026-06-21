@@ -10,7 +10,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   XCircle,
-  HelpCircle
+  HelpCircle,
+  Mic,
+  FolderOpen,
+  Database
 } from 'lucide-react';
 import { timeAgo } from '@/lib/utils';
 import styles from './page.module.css';
@@ -22,6 +25,107 @@ export default function SystemStatus() {
 
   const [status, setStatus] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+
+  const [micPermission, setMicPermission] = useState('unknown');
+  const [storagePermission, setStoragePermission] = useState('unknown');
+  const [exportStatus, setExportStatus] = useState('');
+
+  const checkPermissions = async () => {
+    if (typeof window === 'undefined') return;
+    
+    // Check Microphone Permission via browser query
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        const micStatus = await navigator.permissions.query({ name: 'microphone' });
+        setMicPermission(micStatus.state); // 'granted', 'denied', 'prompt'
+        micStatus.onchange = () => setMicPermission(micStatus.state);
+      } else {
+        setMicPermission('supported');
+      }
+    } catch (e) {
+      setMicPermission('unsupported');
+    }
+
+    // Check Storage Permission via Capacitor Filesystem
+    try {
+      const { Filesystem } = await import('@capacitor/filesystem');
+      const status = await Filesystem.checkPermissions();
+      setStoragePermission(status.publicStorage); // 'granted', 'denied', 'prompt'
+    } catch (e) {
+      setStoragePermission('prompt');
+    }
+  };
+
+  const requestMic = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      setMicPermission('granted');
+    } catch (err) {
+      console.error('Mic permission denied:', err);
+      setMicPermission('denied');
+    }
+  };
+
+  const requestStorage = async () => {
+    try {
+      const { Filesystem } = await import('@capacitor/filesystem');
+      const status = await Filesystem.requestPermissions();
+      setStoragePermission(status.publicStorage);
+    } catch (err) {
+      console.error('Storage permission denied:', err);
+      setStoragePermission('denied');
+    }
+  };
+
+  const handleExportTrainingData = async () => {
+    setExportStatus('Exporting...');
+    try {
+      const { Filesystem, Directory } = await import('@capacitor/filesystem');
+      
+      // Construct a mock rich AI training dataset based on current system status
+      const trainingDataset = {
+        app: "AI Trading Copilot",
+        timestamp: new Date().toISOString(),
+        parameters: {
+          riskLimitPerTrade: 0.02,
+          maxPositions: 8,
+          sectorDiversificationGuard: 0.30,
+          trailingStopPct: 0.05,
+          cooldownDurationHours: 2
+        },
+        systemState: {
+          equity: status?.connectivity ? 99769.91 : 100000.00,
+          positionsCount: status?.workflows?.length || 4
+        },
+        trainingPairs: [
+          {
+            input: "Stock TTWO has strong momentum, no upcoming earnings, positive news catalyst. Action?",
+            output: "STRONG BUY. Place market buy. Immediate GTC trailing stop sell order at 5% trail. Log row."
+          },
+          {
+            input: "Target buy order received for AAPL. Portfolio down -$600 today.",
+            output: "HALT TRADE. Daily loss threshold exceeded (-$500 cap). Log warning details to Slack."
+          }
+        ]
+      };
+
+      await Filesystem.writeFile({
+        path: 'trading_copilot_training_data.json',
+        data: JSON.stringify(trainingDataset, null, 2),
+        directory: Directory.Documents,
+        encoding: 'utf8'
+      });
+
+      setExportStatus('Saved trading_copilot_training_data.json to Documents folder!');
+      setTimeout(() => setExportStatus(''), 5000);
+      setStoragePermission('granted');
+    } catch (err) {
+      console.error('Failed to export training data:', err);
+      setExportStatus(`Failed: ${err.message}. Make sure Storage Permission is granted.`);
+      setTimeout(() => setExportStatus(''), 5000);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -43,8 +147,12 @@ export default function SystemStatus() {
   useEffect(() => {
     setMounted(true);
     fetchData();
+    checkPermissions();
 
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(() => {
+      fetchData();
+      checkPermissions();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -158,6 +266,111 @@ export default function SystemStatus() {
             </div>
           </>
         )}
+      </section>
+
+      {/* Device Permissions & Training Data Export */}
+      <h2 className={styles.logsTitle} style={{ marginBottom: '16px', marginTop: '32px' }}>Device Integrations & Local AI Assets</h2>
+      <section className={styles.permissionsGrid}>
+        <div className={styles.permissionsCard}>
+          <div className={styles.permissionsHeader}>
+            <div className={styles.permissionsName}>
+              <Mic size={18} style={{ color: 'var(--color-profit)' }} />
+              <span>Microphone Access</span>
+            </div>
+            <span className="mono" style={{ 
+              fontSize: '11px', 
+              color: micPermission === 'granted' ? 'var(--color-profit)' : micPermission === 'denied' ? 'var(--color-loss)' : 'var(--text-muted)',
+              fontWeight: 600,
+              textTransform: 'uppercase'
+            }}>
+              {micPermission}
+            </span>
+          </div>
+          
+          <div className={styles.permissionsMetaRow}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
+              Microphone access is required for Hands-Free Voice Assistant mode. Enabling this allows the voice controller orb to detect speech and stream trading requests.
+            </p>
+          </div>
+
+          <button 
+            onClick={requestMic} 
+            disabled={micPermission === 'granted'}
+            className={`${styles.permissionButton} ${micPermission === 'granted' ? styles.permissionButtonActive : ''}`}
+          >
+            {micPermission === 'granted' ? (
+              <>
+                <CheckCircle2 size={16} /> Mic Permission Granted
+              </>
+            ) : (
+              <>
+                <Mic size={16} /> Grant Microphone Access
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className={styles.permissionsCard}>
+          <div className={styles.permissionsHeader}>
+            <div className={styles.permissionsName}>
+              <FolderOpen size={18} style={{ color: 'var(--color-warning)' }} />
+              <span>External Storage Ledger</span>
+            </div>
+            <span className="mono" style={{ 
+              fontSize: '11px', 
+              color: storagePermission === 'granted' ? 'var(--color-profit)' : storagePermission === 'denied' ? 'var(--color-loss)' : 'var(--text-muted)',
+              fontWeight: 600,
+              textTransform: 'uppercase'
+            }}>
+              {storagePermission}
+            </span>
+          </div>
+
+          <div className={styles.permissionsMetaRow}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
+              Allows the AI Copilot to save generated training data, log transactions, and export model parameters directly into the phone's Documents directory.
+            </p>
+            {exportStatus && (
+              <div style={{ 
+                fontSize: '12px', 
+                color: exportStatus.includes('Failed') ? 'var(--color-loss)' : 'var(--color-profit)',
+                background: exportStatus.includes('Failed') ? 'var(--color-loss-bg)' : 'var(--color-profit-bg)',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: `1px solid ${exportStatus.includes('Failed') ? 'var(--color-loss)' : 'var(--color-profit)'}`,
+                fontFamily: 'var(--font-mono)'
+              }}>
+                {exportStatus}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={requestStorage} 
+              disabled={storagePermission === 'granted'}
+              className={`${styles.permissionButton} ${storagePermission === 'granted' ? styles.permissionButtonActive : ''}`}
+              style={{ flex: 1 }}
+            >
+              {storagePermission === 'granted' ? (
+                <>
+                  <CheckCircle2 size={16} /> Storage Granted
+                </>
+              ) : (
+                <>
+                  <FolderOpen size={16} /> Grant Storage
+                </>
+              )}
+            </button>
+            <button 
+              onClick={handleExportTrainingData}
+              className={styles.permissionButton}
+              style={{ flex: 1, border: '1px solid var(--color-profit)', color: 'var(--color-profit)' }}
+            >
+              <Database size={16} /> Export Dataset
+            </button>
+          </div>
+        </div>
       </section>
 
       {/* Workflow Health Grid */}
