@@ -391,7 +391,7 @@ async function scrapeDuckDuckGo(query) {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { message, history = [], aiEngine = 'gemini' } = body;
+    const { message, history = [], aiEngine = 'gemini', conversationId } = body;
 
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
@@ -405,7 +405,7 @@ export async function POST(req) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: message,
-          conversationId: 'a8cae14d-a578-4604-aa95-692133b05a52'
+          conversationId: conversationId || 'a8cae14d-a578-4604-aa95-692133b05a52'
         })
       });
 

@@ -36,6 +36,7 @@ export default function CopilotChat() {
   const [tempUrl, setTempUrl] = useState('');
   const [aiEngine, setAiEngine] = useState('gemini');
   const [tempEngine, setTempEngine] = useState('gemini');
+  const [sessionId, setSessionId] = useState('');
 
   // Voice Mode & Animation States
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -276,6 +277,14 @@ export default function CopilotChat() {
       setAiEngine(savedEngine);
       setTempEngine(savedEngine);
 
+      // Generate or load a stateful session ID for this tab/refresh session
+      let sId = window.sessionStorage.getItem('trading_copilot_session_id');
+      if (!sId) {
+        sId = `session_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+        window.sessionStorage.setItem('trading_copilot_session_id', sId);
+      }
+      setSessionId(sId);
+
       // Initialize Web Speech API
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
@@ -423,7 +432,8 @@ export default function CopilotChat() {
         body: JSON.stringify({
           message: messageText,
           history: historyPayload,
-          aiEngine: aiEngine
+          aiEngine: aiEngine,
+          conversationId: sessionId
         })
       });
 
